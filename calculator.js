@@ -12,7 +12,6 @@
         return a / b;
       },
     },
-    // "neg" is the unary minus, e.g. the "-" in "-5" or "3*-2"
     neg: { precedence: 3, unary: true, apply: (a) => -a },
   };
 
@@ -45,15 +44,12 @@
         if ((num.match(/\./g) || []).length > 1 || num === ".") {
           throw new Error("Invalid number");
         }
-        // Scientific notation, e.g. "1.5e+21", so big or tiny answers
-        // can be used again in the next calculation
         const exponent = s.slice(i).match(/^e[+-]?\d+/i);
         if (exponent) {
           num += exponent[0];
           i += exponent[0].length;
         }
         let value = parseFloat(num);
-        // "50%" means 0.5
         if (s[i] === "%") {
           value /= 100;
           i++;
@@ -65,13 +61,9 @@
 
       if ("+-*/".includes(ch)) {
         const prev = tokens[tokens.length - 1];
-        const isUnary =
-          ch === "-" &&
-          (!prev || prev.type === "op" || prev.value === "(");
-        if (isUnary) tokens.push({ type: "op", value: "neg" });
-        else if (ch === "+" && (!prev || prev.type === "op" || prev.value === "(")) {
-          // unary plus: ignore it
-        } else tokens.push({ type: "op", value: ch });
+        const isUnary = !prev || prev.type === "op" || prev.value === "(";
+        if (isUnary && ch === "-") tokens.push({ type: "op", value: "neg" });
+        else if (!(isUnary && ch === "+")) tokens.push({ type: "op", value: ch });
         i++;
         continue;
       }
@@ -101,7 +93,6 @@
           const top = stack[stack.length - 1];
           if (top.type !== "op") break;
           const topOp = OPERATORS[top.value];
-          // unary minus is right-associative, the rest are left-associative
           const shouldPop = op.unary
             ? topOp.precedence > op.precedence
             : topOp.precedence >= op.precedence;
@@ -112,7 +103,6 @@
       } else if (t.value === "(") {
         stack.push(t);
       } else {
-        // ")"
         while (stack.length && stack[stack.length - 1].value !== "(") {
           output.push(stack.pop());
         }
@@ -165,7 +155,6 @@
   function format(n) {
     if (!Number.isFinite(n)) return "Error";
     if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-9 && n !== 0)) {
-      // 1.500000e+21 -> 1.5e+21
       return n.toExponential(6).replace(/\.?0+e/, "e");
     }
     return n.toLocaleString("en-US", { maximumFractionDigits: 10 });

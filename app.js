@@ -1,4 +1,3 @@
-// Connects the buttons and keyboard to the calculator engine (calculator.js).
 (function () {
   "use strict";
 
@@ -8,7 +7,7 @@
 
   let expression = "";
   let justEvaluated = false;
-  let lastAnswer = 0; // the real number, not the formatted text on screen
+  let lastAnswer = 0;
   const history = [];
 
   function toExpression(value) {
@@ -17,26 +16,20 @@
 
   function render() {
     expressionEl.textContent = expression;
-    // Live preview of the answer while typing
     if (!justEvaluated) {
       try {
         resultEl.textContent = Calc.format(Calc.evaluate(expression));
         resultEl.classList.remove("error");
-      } catch {
-        // Unfinished expression like "5+" – keep the last preview
-      }
+      } catch {}
     }
   }
 
   function input(value) {
     const isOperator = "+−×÷".includes(value);
     if (justEvaluated) {
-      // After "=", typing an operator continues from the answer,
-      // typing a number starts a new calculation.
       expression = isOperator ? toExpression(lastAnswer) : "";
       justEvaluated = false;
     }
-    // Replace the last operator instead of stacking "5+×"
     const last = expression.slice(-1);
     if (isOperator && "+×÷".includes(last) && value !== "−") {
       expression = expression.slice(0, -1);
@@ -97,7 +90,6 @@
     }
   }
 
-  // Buttons
   document.querySelector(".keys").addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
@@ -108,7 +100,6 @@
     else if (action === "backspace") backspace();
   });
 
-  // Keyboard
   const keyMap = { "*": "×", "/": "÷", "-": "−", "+": "+" };
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;

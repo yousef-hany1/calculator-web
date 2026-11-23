@@ -1,4 +1,3 @@
-// Run with: node --test
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const Calc = require("./calculator.js");
@@ -43,7 +42,6 @@ test("implied multiplication", () => {
 test("scientific notation (very big and very small answers)", () => {
   assert.equal(Calc.evaluate("1.5e+21×2"), 3e21);
   assert.equal(Calc.evaluate("2e-10×2"), 4e-10);
-  // A big answer can be used again in the next calculation
   const big = Calc.evaluate("99999999999×99999999999");
   assert.match(String(big), /e\+/);
   assert.equal(Calc.evaluate(`${big}÷${big}`), 1);
