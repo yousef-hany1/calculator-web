@@ -1,13 +1,3 @@
-/**
- * Calculator engine.
- *
- * Turns a math expression string into a number WITHOUT using eval():
- *   1. tokenize()  – split "12+3×(4-1)" into numbers, operators and brackets
- *   2. toRPN()     – reorder tokens with the shunting-yard algorithm
- *   3. evalRPN()   – compute the result with a stack
- *
- * Works in the browser (window.Calc) and in Node (require) for the tests.
- */
 (function (root) {
   "use strict";
 
@@ -26,7 +16,6 @@
     neg: { precedence: 3, unary: true, apply: (a) => -a },
   };
 
-  /** Convert the display symbols to plain ASCII operators. */
   function normalize(expr) {
     return String(expr)
       .replace(/×/g, "*")
@@ -35,10 +24,6 @@
       .replace(/\s+/g, "");
   }
 
-  /**
-   * Implied multiplication: "2(3)", "(2)(3)" and "(2)3" mean 2×3.
-   * Called just before a number or "(" is added.
-   */
   function addImpliedTimes(tokens) {
     const prev = tokens[tokens.length - 1];
     if (prev && (prev.type === "num" || prev.value === ")")) {
@@ -103,7 +88,6 @@
     return tokens;
   }
 
-  /** Shunting-yard: infix tokens -> Reverse Polish Notation. */
   function toRPN(tokens) {
     const output = [];
     const stack = [];
@@ -167,7 +151,6 @@
     return stack[0];
   }
 
-  /** Round away floating-point noise: 0.1 + 0.2 -> 0.3 */
   function clean(n) {
     return parseFloat(n.toPrecision(12));
   }
@@ -179,7 +162,6 @@
     return clean(result);
   }
 
-  /** Format a result for the display, e.g. 1234567.5 -> "1,234,567.5" */
   function format(n) {
     if (!Number.isFinite(n)) return "Error";
     if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-9 && n !== 0)) {

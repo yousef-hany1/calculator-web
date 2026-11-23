@@ -11,7 +11,6 @@
   let lastAnswer = 0; // the real number, not the formatted text on screen
   const history = [];
 
-  /** Turn an answer back into text the engine can read, e.g. -3 -> "−3" */
   function toExpression(value) {
     return String(value).replace(/-/g, "−");
   }
