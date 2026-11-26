@@ -90,6 +90,7 @@ body {
   color: var(--text);
   font-size: 1.35rem;
   cursor: pointer;
+  touch-action: manipulation;
   transition: background 0.12s, transform 0.08s;
 }
 

@@ -9,6 +9,8 @@ A clean calculator built with plain **HTML, CSS and JavaScript**: no frameworks 
 - Add, subtract, multiply, divide, brackets and percent (`200×10%` → `20`, `(20+30)%` → `0.5`)
 - Correct order of operations (`2+3×4` → `14`)
 - Implied multiplication (`2(3+4)` → `14`)
+- Smart input: keys that could only cause an error are ignored (like a second decimal point or `×` at the start), and open brackets are closed for you when you press `=`
+- Accurate to 15 digits; when you keep calculating with an answer, its full value is used (`1÷3` then `×3` → `1`)
 - Very large and very small answers shown in scientific notation (`1.5e+21`), and you can keep calculating with them
 - Live preview of the answer while you type
 - Full keyboard support

@@ -25,6 +25,11 @@ test("negative numbers", () => {
 test("decimals and floating point noise", () => {
   assert.equal(Calc.evaluate("0.1+0.2"), 0.3);
   assert.equal(Calc.evaluate("1.5×2"), 3);
+  assert.equal(Calc.evaluate("1.005×100"), 100.5);
+  assert.equal(Calc.evaluate("4.35×100"), 435);
+  assert.equal(Calc.evaluate("123456789012345+0"), 123456789012345);
+  assert.ok(Object.is(Calc.evaluate("0×−5"), 0));
+  assert.equal(Calc.format(Calc.evaluate("0×−5")), "0");
 });
 
 test("percent", () => {
@@ -67,6 +72,6 @@ test("format", () => {
   assert.equal(Calc.format(Infinity), "Error");
   assert.equal(Calc.format(0.000000012345), "1.2345e-8");
   assert.equal(Calc.format(9.9999999998e21), "9.9999999998e+21");
-  assert.equal(Calc.format(1 / 3), "0.333333333333");
+  assert.equal(Calc.format(1 / 3), "0.333333333333333");
   assert.equal(Calc.format(0.000123), "0.000123");
 });

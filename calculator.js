@@ -148,25 +148,29 @@
   }
 
   function clean(n) {
-    return parseFloat(n.toPrecision(12));
+    return parseFloat(n.toPrecision(15)) || 0;
   }
 
-  function evaluate(expr) {
+  function calculate(expr) {
     if (!normalize(expr)) return 0;
     const result = evalRPN(toRPN(tokenize(expr)));
     if (!Number.isFinite(result)) throw new Error("Number too large");
-    return clean(result);
+    return result;
+  }
+
+  function evaluate(expr) {
+    return clean(calculate(expr));
   }
 
   function format(n) {
     if (!Number.isFinite(n)) return "Error";
     if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-6 && n !== 0)) {
-      return n.toExponential(11).replace(/\.?0+e/, "e");
+      return n.toExponential(14).replace(/\.?0+e/, "e");
     }
-    return n.toLocaleString("en-US", { maximumSignificantDigits: 12 });
+    return n.toLocaleString("en-US", { maximumSignificantDigits: 15 });
   }
 
-  const Calc = { tokenize, toRPN, evaluate, format };
+  const Calc = { tokenize, toRPN, calculate, clean, evaluate, format };
 
   if (typeof module !== "undefined" && module.exports) module.exports = Calc;
   else root.Calc = Calc;

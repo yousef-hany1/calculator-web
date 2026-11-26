@@ -8,6 +8,7 @@
   let expression = "";
   let justEvaluated = false;
   let lastAnswer = 0;
+  let carried = null;
   let preview = "0";
   const history = [];
 
@@ -15,37 +16,92 @@
     return String(value).replace(/-/g, "−");
   }
 
+  function carry(raw) {
+    expression = toExpression(Calc.clean(raw));
+    carried = { text: expression, raw };
+  }
+
+  function exact(expr) {
+    if (!carried || !expr.startsWith(carried.text)) return expr;
+    const rest = expr.slice(carried.text.length);
+    if (/^[0-9.e]/i.test(rest)) return expr;
+    return String(carried.raw) + rest;
+  }
+
   function render() {
     expressionEl.textContent = expression;
     if (justEvaluated) return;
     try {
-      preview = Calc.format(Calc.evaluate(expression));
+      preview = Calc.format(Calc.evaluate(exact(expression)));
     } catch {}
     resultEl.textContent = preview;
     resultEl.classList.remove("error");
   }
 
-  function input(value) {
-    const isOperator = "+−×÷".includes(value);
-    if (justEvaluated) {
-      expression = isOperator ? toExpression(lastAnswer) : "";
-      justEvaluated = false;
+  function openBrackets() {
+    let count = 0;
+    for (const ch of expression) {
+      if (ch === "(") count++;
+      else if (ch === ")") count--;
     }
+    return count;
+  }
+
+  function nextExpression(value) {
     const last = expression.slice(-1);
-    if (isOperator && "+×÷".includes(last) && value !== "−") {
-      expression = expression.slice(0, -1);
+    const endsValue = /[0-9.)%]/.test(last);
+
+    if ("+−×÷".includes(value)) {
+      const trail = (expression.match(/[+−×÷]+$/) || [""])[0];
+      const base = expression.slice(0, expression.length - trail.length);
+      const atStart = base === "" || base.endsWith("(");
+      if (value === "−") {
+        if (trail.endsWith("−")) return null;
+        if (trail.endsWith("+")) return expression.slice(0, -1) + "−";
+        return expression + "−";
+      }
+      if (atStart) return null;
+      return base + value;
     }
-    expression += value;
+
+    if (value === ".") {
+      const number = expression.match(/[0-9.]*$/)[0];
+      if (number.includes(".") || /e[+−]?\d*$/i.test(expression)) return null;
+      return expression + (number ? "." : "0.");
+    }
+
+    if (value === "%") return endsValue ? expression + "%" : null;
+
+    if (value === ")") {
+      return openBrackets() > 0 && endsValue ? expression + ")" : null;
+    }
+
+    return expression + value;
+  }
+
+  function input(value) {
+    if (justEvaluated) {
+      justEvaluated = false;
+      if ("+−×÷%".includes(value)) carry(lastAnswer);
+      else {
+        expression = "";
+        carried = null;
+      }
+    }
+    const next = nextExpression(value);
+    if (next === null) return render();
+    expression = next;
     render();
   }
 
   function equals() {
-    if (!expression) return;
+    if (!expression || justEvaluated) return;
+    expression += ")".repeat(Math.max(openBrackets(), 0));
     try {
-      const value = Calc.evaluate(expression);
-      const answer = Calc.format(value);
-      addToHistory(expression, answer, value);
-      lastAnswer = value;
+      const raw = Calc.calculate(exact(expression));
+      const answer = Calc.format(Calc.clean(raw));
+      addToHistory(expression, answer, raw);
+      lastAnswer = raw;
       resultEl.textContent = answer;
       resultEl.classList.remove("error");
       justEvaluated = true;
@@ -58,6 +114,7 @@
 
   function clear() {
     expression = "";
+    carried = null;
     justEvaluated = false;
     preview = "0";
     render();
@@ -80,7 +137,7 @@
       btn.textContent = `${item.expr} = ${item.answer}`;
       btn.title = "Use this result";
       btn.addEventListener("click", () => {
-        expression = toExpression(item.value);
+        carry(item.value);
         justEvaluated = false;
         render();
       });
