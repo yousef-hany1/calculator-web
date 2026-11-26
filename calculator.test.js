@@ -30,6 +30,12 @@ test("decimals and floating point noise", () => {
 test("percent", () => {
   assert.equal(Calc.evaluate("50%"), 0.5);
   assert.equal(Calc.evaluate("200×10%"), 20);
+  assert.equal(Calc.evaluate("(50)%"), 0.5);
+  assert.equal(Calc.evaluate("(20+30)%×4"), 2);
+  assert.equal(Calc.evaluate("-50%"), -0.5);
+  assert.equal(Calc.evaluate("50%2"), 1);
+  assert.throws(() => Calc.evaluate("%"), /Incomplete/);
+  assert.throws(() => Calc.evaluate("5+%"), /Incomplete/);
 });
 
 test("implied multiplication", () => {
@@ -59,4 +65,8 @@ test("format", () => {
   assert.equal(Calc.format(1234567.5), "1,234,567.5");
   assert.equal(Calc.format(1.5e21), "1.5e+21");
   assert.equal(Calc.format(Infinity), "Error");
+  assert.equal(Calc.format(0.000000012345), "1.2345e-8");
+  assert.equal(Calc.format(9.9999999998e21), "9.9999999998e+21");
+  assert.equal(Calc.format(1 / 3), "0.333333333333");
+  assert.equal(Calc.format(0.000123), "0.000123");
 });

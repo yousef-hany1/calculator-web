@@ -8,6 +8,7 @@
   let expression = "";
   let justEvaluated = false;
   let lastAnswer = 0;
+  let preview = "0";
   const history = [];
 
   function toExpression(value) {
@@ -16,12 +17,12 @@
 
   function render() {
     expressionEl.textContent = expression;
-    if (!justEvaluated) {
-      try {
-        resultEl.textContent = Calc.format(Calc.evaluate(expression));
-        resultEl.classList.remove("error");
-      } catch {}
-    }
+    if (justEvaluated) return;
+    try {
+      preview = Calc.format(Calc.evaluate(expression));
+    } catch {}
+    resultEl.textContent = preview;
+    resultEl.classList.remove("error");
   }
 
   function input(value) {
@@ -58,15 +59,13 @@
   function clear() {
     expression = "";
     justEvaluated = false;
-    resultEl.textContent = "0";
-    resultEl.classList.remove("error");
+    preview = "0";
     render();
   }
 
   function backspace() {
     if (justEvaluated) return clear();
     expression = expression.slice(0, -1);
-    if (!expression) resultEl.textContent = "0";
     render();
   }
 

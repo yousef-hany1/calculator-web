@@ -6,7 +6,7 @@ A clean calculator built with plain **HTML, CSS and JavaScript**: no frameworks 
 
 ## Features
 
-- Add, subtract, multiply, divide, brackets and percent (`200×10%` → `20`)
+- Add, subtract, multiply, divide, brackets and percent (`200×10%` → `20`, `(20+30)%` → `0.5`)
 - Correct order of operations (`2+3×4` → `14`)
 - Implied multiplication (`2(3+4)` → `14`)
 - Very large and very small answers shown in scientific notation (`1.5e+21`), and you can keep calculating with them

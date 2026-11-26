@@ -13,6 +13,7 @@
       },
     },
     neg: { precedence: 3, unary: true, apply: (a) => -a },
+    "%": { precedence: 4, unary: true, apply: (a) => a / 100 },
   };
 
   function normalize(expr) {
@@ -25,7 +26,7 @@
 
   function addImpliedTimes(tokens) {
     const prev = tokens[tokens.length - 1];
-    if (prev && (prev.type === "num" || prev.value === ")")) {
+    if (prev && (prev.type === "num" || prev.type === "postfix" || prev.value === ")")) {
       tokens.push({ type: "op", value: "*" });
     }
   }
@@ -49,13 +50,18 @@
           num += exponent[0];
           i += exponent[0].length;
         }
-        let value = parseFloat(num);
-        if (s[i] === "%") {
-          value /= 100;
-          i++;
-        }
         addImpliedTimes(tokens);
-        tokens.push({ type: "num", value });
+        tokens.push({ type: "num", value: parseFloat(num) });
+        continue;
+      }
+
+      if (ch === "%") {
+        const prev = tokens[tokens.length - 1];
+        if (!prev || prev.type === "op" || prev.value === "(") {
+          throw new Error("Incomplete expression");
+        }
+        tokens.push({ type: "postfix", value: "%" });
+        i++;
         continue;
       }
 
@@ -85,7 +91,7 @@
     const stack = [];
 
     for (const t of tokens) {
-      if (t.type === "num") {
+      if (t.type === "num" || t.type === "postfix") {
         output.push(t);
       } else if (t.type === "op") {
         const op = OPERATORS[t.value];
@@ -154,10 +160,10 @@
 
   function format(n) {
     if (!Number.isFinite(n)) return "Error";
-    if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-9 && n !== 0)) {
-      return n.toExponential(6).replace(/\.?0+e/, "e");
+    if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-6 && n !== 0)) {
+      return n.toExponential(11).replace(/\.?0+e/, "e");
     }
-    return n.toLocaleString("en-US", { maximumFractionDigits: 10 });
+    return n.toLocaleString("en-US", { maximumSignificantDigits: 12 });
   }
 
   const Calc = { tokenize, toRPN, evaluate, format };
